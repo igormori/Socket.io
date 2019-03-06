@@ -28,18 +28,23 @@ if(localStorage.getItem("user")){
       //Emit a username
       //create the initial room
       socket.emit('connect',socket);
-      socket.emit('create', {roomNumber:1,userName:user});
       socket.emit('true',{userName:user});
+      socket.emit('create', {roomNumber:1,userName:user});
+
+      //change room color
+    socket.on('connected',(data)=>{
+      $('.chat').removeClass(`bg-${data.oldColor}`);
+      $('.chat').addClass(`bg-${data.newColor}`)
+    })
   
     socket.on("list_update",(data)=>{
-        console.log(data.userName)
+        //console.log(data.userName)
         if(data.status == false){
             $("#"+data.userName).remove();
         }else{
             $("#"+data.userName).remove();
             users.append($('<li '+'id='+data.userName+'>'+'('+time+') '+data.userName+'</li>'  ));
         }
-   
     })
     
     //emit disconnection
@@ -72,52 +77,21 @@ if(localStorage.getItem("user")){
     socket.on('users',(data)=>{
       
         for (var i = 0; i < data.users.length; i++) {
-           
           if (data.users[i].connected == true){
+            console.log(data.users)
             $("#"+data.users[i].user).remove()
             users.append($('<li '+'id='+data.users[i].user+'>'+'('+time+') '+data.users[i].user+'</li>'  ));
           }
         }
     })
     
-    //change room color
-    socket.on('connected',(data)=>{
-      $('.chat').removeClass(`bg-${data.oldColor}`);
-      $('.chat').addClass(`bg-${data.newColor}`)
-    })
-    
     
     //change room 
     room_change.click(function(){
-      socket.emit('changeRoom',{roomNumber:2})
+      socket.emit('changeRoom',{roomNumber:2,userName:user})
     })
     
   }else{
     window.location= "/login"
   }
-  
-  // $('#blue').click(function(e) {
-  //   var socket = io();
-  //   e.preventDefault(); // prevents page reloading
-  //   socket.emit('userName',  $('#name').val());
-  // });
-  
-  // $('#').click(function(e) {
-  //   var socket = io();
-  //   e.preventDefault(); // prevents page reloading
-  //   socket.emit('userName',  $('#name').val());
-  // });
-  
-  
-  
-    
-    // socket.on('list_update',(data)=>{
-    //   if(data.userName == user){
-    //     $("#"+data.userName).remove()
-    //     users.append($('<li '+'id='+data.userName+'>'+'('+dateF.time +') '+data.userName+'</li>'  ));
-    //   }
-    // })
-  
-  
-  
   

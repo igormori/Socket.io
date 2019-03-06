@@ -1,3 +1,5 @@
+var request = require('request')
+
 exports.date = function(date) {
     var hours = date.getHours();
     var minutes = date.getMinutes();
@@ -19,3 +21,34 @@ exports.date = function(date) {
     var strTime = hours + ':' + minutes + ' ' + ampm;
     return strTime;
   }
+
+
+  exports.setTrue =  function(user){ 
+        request.put({
+          url: `http://localhost:5000/api/users/${user}`, 
+          json: {
+            connected:true
+          }
+    }, function(error, response, body) {
+          try{
+            response.body.connected
+          }catch(error){
+            console.log(error)
+          }
+    })
+  }
+
+  exports.setFalse =  function(user){ 
+    request.put({
+      url: `http://localhost:5000/api/users/${user}`, 
+      json: {
+        connected:false
+      }
+}, function(error, response, body) {
+      try{
+        response.body.connected
+      }catch(error){
+        console.log(error)
+      }
+})
+}

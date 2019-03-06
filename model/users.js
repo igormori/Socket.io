@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const history = mongoose.Schema({
+const users= mongoose.Schema({
     user : String,
     date: String,
     time: String,
@@ -8,4 +8,4 @@ const history = mongoose.Schema({
     connected: Boolean 
 })
 
-module.exports = mongoose.model('history', history);
+module.exports = mongoose.model('users', users);

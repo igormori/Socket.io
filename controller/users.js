@@ -1,8 +1,8 @@
-var history = require('../model/historyModel')
+var users = require('../model/users')
 
-exports.registerHistories = async function (req, res) {
+exports.registerUsers = async function (req, res) {
     try{
-        await history.create({
+        await users.create({
             user:req.body.user,
             date:req.body.date,
             time: req.body.time,
@@ -25,7 +25,7 @@ exports.registerHistories = async function (req, res) {
 
 exports.editOne = async function (req, res) {
     try {
-        await history.updateOne({user:req.params.user}, {
+        await users.updateOne({user:req.params.user}, {
             connected: req.body.connected
         })
         res.status(200).send({
@@ -40,10 +40,10 @@ exports.editOne = async function (req, res) {
 }
 
 
-exports.getHistory = async function(req,res){
+exports.getusers = async function(req,res){
     try{
-        let getHystory = await history.find()
-        res.status(200).send(getHystory)
+        let getUsers = await users.find()
+        res.status(200).send(getUsers)
     }catch(error){
         res.status(400).send({
             message:"no data",
