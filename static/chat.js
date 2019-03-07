@@ -1,6 +1,21 @@
-
-if(localStorage.getItem("user")){
-    var socket = io();
+ var request =function (){
+    const myHeaders = new Headers();
+   myHeaders.append('Content-Type', 'application/json');
+   myHeaders.append('x-access-token', localStorage.getItem("token"));
+   fetch('http://localhost:5000/api/me', {
+    method: 'GET',
+    headers: myHeaders
+  }).then(res => res.json())//response type
+  .then(data =>{
+    if(data.auth !=false){
+      localStorage.setItem("user",true)
+    }else{
+      window.location ='/'
+    }
+  });
+ }
+ request()
+  var socket = io();
     
     //time stamp
     function formatDate(date) {
@@ -78,7 +93,5 @@ if(localStorage.getItem("user")){
       window.location = "/login";
   })
     
-  }else{
-    window.location= "/"
-  }
+ 
   

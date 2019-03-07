@@ -1,11 +1,35 @@
-var password = false;
-$('#password1, #password2').on('keyup', function () {
-    if ($('#password1').val() == $('#password2').val()) {
-      $('#message').html('Password match').css('color', 'green');
-      password = true
-    } else 
-    password = false
-      $('#message').html('Password does not match').css('color', 'red');
+ 
+  $("#btn").click(function(){
+    var email =$("#email").val()
+    var password =$("#password1").val()
+    var userName =$("#userName").val()
+   
+
+    //input
+ 
+    var data = {
+      "user":userName,
+      "email": email,
+      "password":password
+
+}	;
+
+    fetch('http://localhost:5000/api/register', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data) 
+    
+    })
+    .then(data =>{
+       console.log(data)
+        //window.location = "/chat"
+    
+        
+    }); //log the data;
   });
+
 
 

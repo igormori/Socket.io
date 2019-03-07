@@ -90,3 +90,18 @@ exports.addHistory = function(u,m,d,t,r){
 })
 }
 
+exports.login = function(e,p){
+  request.post({
+    url: `http://localhost:5000/api/login`, 
+    json: {
+        email : e,
+        password:p
+    }
+}, function(error, response, body) {
+    try{
+      console.log("history added")
+    }catch(error){
+      console.log(error)
+    }
+})
+}
