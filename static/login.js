@@ -3,6 +3,7 @@ $("#btn").click(function(){
 //input
 var email =$("#email").val()
 var password =$("#password").val()
+  
 
     var data = {
         "email": email,

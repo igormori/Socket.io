@@ -8,7 +8,8 @@
   }).then(res => res.json())//response type
   .then(data =>{
     if(data.auth !=false){
-      localStorage.setItem("user",true)
+      localStorage.setItem("validation",true)
+      localStorage.setItem("user",data.email)
     }else{
       window.location ='/'
     }
@@ -30,7 +31,7 @@
     }
     var d = new Date();
     var time = formatDate(d);
-  
+ 
     // inputs
     var message = $('#m');
     var send_message = $('#sub');
@@ -40,6 +41,7 @@
     var user = localStorage.getItem("user");
     var disconnect = $("#btnDisconnect");
     
+    console.log(user)
       //create the initial connection
       socket.emit('connect',socket);
       socket.emit('true',{userName:user});

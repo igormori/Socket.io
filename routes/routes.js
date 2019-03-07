@@ -9,7 +9,7 @@ const register = require("../auth/AuthController")
 router.post('/eventLog', eventController.registerEvents);
 router.get('/eventLog',eventController.getEvents);
 router.post('/users',users.registerUsers);
-router.put('/users/:user',users.editOne);
+router.put('/users/:email',users.editOne);
 router.get('/users',users.getusers);
 router.post('/history',history.registerHystory);
 

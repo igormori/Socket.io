@@ -45,6 +45,10 @@ module.exports = function(io){
          io.sockets.in(socket.room).emit('new_message',{ message:data.message , userName:data.userName}); 
        });
 
+
+
+
+       
       // Change room
       socket.on("changeRoom", (room) => {
          var color = ""
