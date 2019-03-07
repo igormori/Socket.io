@@ -1,61 +1,47 @@
-var request = require('request')
 const axios = require('axios');
 const controller = require('./controller/controller')
+var d = new Date();
 
+/* Algorithm
+1- set user to true
+2- grab user list from data base 
+3- join new user to the room 
+*/
 
-// Add the WebSocket handlers
 module.exports = function(io){
-   
    io.on('connect', function(socket) {
 
-       // set user to true when connected
+      socket.room = 1
+       //set user to true when connected
        socket.on("true",(data)=>{
-         var d = new Date();
          controller.setTrue(data.userName);
          //add log
          controller.addLog(data.userName,controller.date(d),controller.time(d),"connection")
       })
-
-         //message only for the socket
-         socket.emit('new_update',  {message: `** you have joined a new chat **`} ); 
-
-         socket.userName = ""
-         //create the initial room
-         socket.room = 1;
+      //emite message for the client 
+      socket.emit('new_update',  {message: `** you have joined a new chat **`} ); 
       
-         socket.on('create', function(room) {
+      //new room creation and user list update
+      socket.on('create', function(room) {
         
-            //update connected user list
-            axios.get('http://localhost:5000/api/users')
-            .then(function (response) {
-               io.sockets.in(socket.room).emit('users',{ users:response.data});
-            })
-            .catch(function (error) {console.log(error);});
+         //update connected user list
+         axios.get('http://localhost:5000/api/users')
+         .then(function (response) {
+            io.sockets.in(room.roomNumber).emit('users',{ users:response.data});
+          }).catch(function (error) {console.log(error);});
 
-            //join the new user to the new room
-            socket.join(room.roomNumber);
-            socket.room = room.roomNumber;
-            socket.userName = room.userName;
-            
-            //send update message
-            // emit to everyone else in the room 
-            socket.broadcast.to(socket.room).emit('new_update',  {message:`** ${socket.userName} joined the chat **`,update:"no"} );
-         })
-         
-         // disconnection
-         socket.on("disconnection",(data)=>{
-            var d = new Date();
-            //add log
-            controller.addLog(data.userName,controller.date(d),controller.time(d),"disconnection")
-
-            io.sockets.in(socket.room).emit('list_update',{userName:data.userName,status:false});
-            //emite the disconnection update
-            socket.to(socket.room).emit('new_update',  {message:`** ${data.userName} disconnected **`} );
-            controller.setFalse(data.userName)
+         //join the new user to the new room
+         socket.join(room.roomNumber);
+         socket.room = room.roomNumber
+       
+         // emit to everyone else in the room 
+         socket.broadcast.to(socket.room).emit('new_update',{message:`** ${socket.userName} joined the chat **`,update:"no"} );
          })
 
        //listen on new_message
        socket.on('new_message',(data)=>{
+         console.log(socket.room)
+         controller.addHistory(data.userName,data.message,controller.time(d),controller.date(d),socket.room)
          io.sockets.in(socket.room).emit('new_message',{ message:data.message , userName:data.userName}); 
        });
 
@@ -73,7 +59,6 @@ module.exports = function(io){
                // display null
                // display the same list of rooms the specified room is still there
             });
-            var d = new Date();
             //add log
             controller.addLog(room.userName,controller.date(d),controller.time(d),"Joined")
 
@@ -86,8 +71,19 @@ module.exports = function(io){
             io.sockets.in(room.roomNumber).emit('list_update',{userName:socket.userName,status:true});
             io.sockets.in(room.roomNumber).emit('connected',  {oldColor:"danger",newColor:color} ); 
             io.sockets.in(room.roomNumber).emit('new_update',  {message:`** ${socket.userName} joined a new room **`} );  
-         
       });
+
+      // disconnection
+      socket.on("disconnection",(data)=>{
+            var d = new Date();
+            //add log
+            controller.addLog(data.userName,controller.date(d),controller.time(d),"disconnection")
+
+            io.sockets.in(socket.room).emit('list_update',{userName:data.userName,status:false});
+            //emite the disconnection update
+            socket.to(socket.room).emit('new_update',  {message:`** ${data.userName} disconnected **`} );
+            controller.setFalse(data.userName)
+      })
       
    })
   

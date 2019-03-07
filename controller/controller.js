@@ -71,3 +71,22 @@ exports.addLog =  function(u,d,t,e){
 })
 }
 
+exports.addHistory = function(u,m,d,t,r){
+  request.post({
+    url: `http://localhost:5000/api/history`, 
+    json: {
+        user : u,
+        message:m,
+        date: d,
+        time: t,
+        room: r
+    }
+}, function(error, response, body) {
+    try{
+      console.log("history added")
+    }catch(error){
+      console.log(error)
+    }
+})
+}
+
