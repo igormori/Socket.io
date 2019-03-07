@@ -22,10 +22,10 @@ app.use('/api',eventsLog);
 app.set('port', 5000);
 app.use('/static', express.static(__dirname + '/static'));
 // Routing
-app.get('/', function(request, response) {
+app.get('/chat', function(request, response) {
   response.sendFile(path.join(__dirname, 'index.html'));
 });
-app.get('/login', function(request, response) {
+app.get('/', function(request, response) {
   response.sendFile(path.join(__dirname, 'login.html'));
 });
 app.get('/register', function(request, response) {

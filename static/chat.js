@@ -79,6 +79,6 @@ if(localStorage.getItem("user")){
   })
     
   }else{
-    window.location= "/login"
+    window.location= "/"
   }
   
