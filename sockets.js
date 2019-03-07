@@ -10,7 +10,10 @@ module.exports = function(io){
 
        // set user to true when connected
        socket.on("true",(data)=>{
+         var d = new Date();
          controller.setTrue(data.userName);
+         //add log
+         controller.addLog(data.userName,controller.date(d),controller.time(d),"connection")
       })
 
          //message only for the socket
@@ -41,6 +44,10 @@ module.exports = function(io){
          
          // disconnection
          socket.on("disconnection",(data)=>{
+            var d = new Date();
+            //add log
+            controller.addLog(data.userName,controller.date(d),controller.time(d),"disconnection")
+
             io.sockets.in(socket.room).emit('list_update',{userName:data.userName,status:false});
             //emite the disconnection update
             socket.to(socket.room).emit('new_update',  {message:`** ${data.userName} disconnected **`} );
@@ -66,6 +73,10 @@ module.exports = function(io){
                // display null
                // display the same list of rooms the specified room is still there
             });
+            var d = new Date();
+            //add log
+            controller.addLog(room.userName,controller.date(d),controller.time(d),"Joined")
+
             socket.room = room.roomNumber;
             socket.join(socket.room);
 

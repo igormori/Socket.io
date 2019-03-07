@@ -8,6 +8,5 @@ const eventLogs = mongoose.Schema({
     event: String
 })
 
-
 module.exports = mongoose.model('eventLogs', eventLogs);
 

@@ -22,7 +22,6 @@ exports.date = function(date) {
     return strTime;
   }
 
-
   exports.setTrue =  function(user){ 
         request.put({
           url: `http://localhost:5000/api/users/${user}`, 
@@ -52,3 +51,23 @@ exports.date = function(date) {
       }
 })
 }
+
+
+exports.addLog =  function(u,d,t,e){ 
+  request.post({
+    url: `http://localhost:5000/api/eventLog`, 
+    json: {
+        user : u,
+        date: d,
+        time: t,
+        event: e
+    }
+}, function(error, response, body) {
+    try{
+      response.body.connected
+    }catch(error){
+      console.log(error)
+    }
+})
+}
+
