@@ -39,6 +39,22 @@ exports.editOne = async function (req, res) {
     }
 }
 
+exports.editRoom = async function (req, res) {
+    try {
+        await users.updateOne({email:req.params.email}, {
+            room: req.body.room
+        })
+        res.status(200).send({
+            message: "Done!"
+        })
+    } catch (error) {
+        res.status(404).send({
+            message: "Error to edit",
+            error: error.message
+        })
+    }
+}
+
 
 exports.getusers = async function(req,res){
     try{

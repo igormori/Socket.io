@@ -22,20 +22,32 @@ module.exports = function(io){
       socket.emit('new_update',  {message: `** you have joined a new chat **`} ); 
       
       //new room creation and user list update
-      socket.on('create', function(room) {
-        
+      socket.on('create', function(room) {  
          //update connected user list
          axios.get('http://localhost:5000/api/users')
          .then(function (response) {
-            io.sockets.in(room.roomNumber).emit('users',{ users:response.data});
+            for (var i = 0; i < response.data.length; i++) {
+               if(response.data[i].email == room.userName && response.data[i].connected == true){
+                  if(!response.data[i].room){
+                    controller.setRoom(response.data[i].email,room.roomNumber);  
+                  }else{
+                     room.roomNumber = response.data[i].room
+                  }
+                      //join the new user to the new room
+                     socket.join(room.roomNumber);
+                     socket.room = room.roomNumber
+                  if(response.data[i].room == room.roomNumber){
+                        
+                        io.sockets.in(room.roomNumber).emit('users',{ users:response.data[i].user});
+                  }
+               }
+            }
+        
           }).catch(function (error) {console.log(error);});
 
-         //join the new user to the new room
-         socket.join(room.roomNumber);
-         socket.room = room.roomNumber
        
          // emit to everyone else in the room 
-         socket.broadcast.to(socket.room).emit('new_update',{message:`** ${socket.userName} joined the chat **`,update:"no"} );
+         socket.broadcast.to(room.roomNumber).emit('new_update',{message:`** ${socket.userName} joined the chat **`,update:"no"} );
          })
 
        //listen on new_message
@@ -46,9 +58,6 @@ module.exports = function(io){
        });
 
 
-
-
-       
       // Change room
       socket.on("changeRoom", (room) => {
          var color = ""

@@ -1,21 +1,3 @@
- var request =function (){
-    const myHeaders = new Headers();
-   myHeaders.append('Content-Type', 'application/json');
-   myHeaders.append('x-access-token', localStorage.getItem("token"));
-   fetch('http://localhost:5000/api/me', {
-    method: 'GET',
-    headers: myHeaders
-  }).then(res => res.json())//response type
-  .then(data =>{
-    if(data.auth !=false){
-      localStorage.setItem("validation",true)
-      localStorage.setItem("user",data.email)
-    }else{
-      window.location ='/'
-    }
-  });
- }
- request()
   var socket = io();
     
     //time stamp
@@ -41,9 +23,9 @@
     var user = localStorage.getItem("user");
     var disconnect = $("#btnDisconnect");
     
-    console.log(user)
       //create the initial connection
       socket.emit('connect',socket);
+      console.log(user)
       socket.emit('true',{userName:user});
       socket.emit('create', {roomNumber:1,userName:user});
 
@@ -66,20 +48,24 @@
     
     //listen on new_message
     socket.on("new_message",(data)=>{
-      console.log(data);
       chatRoom.append($('<li> ('+time+') <b> '+ data.userName+ '</b>'+ ' says:  '+ data.message+ '</li>'));
-    
+    })
+
+    socket.on("list_update",(data)=>{
+      if(data.status == false){
+        $("#"+data.userName).remove()
+      }else{
+        users.append($('<li '+'id='+data.userName+'>'+'('+time+') '+data.userName+'</li>'  ));
+      }
     })
     
     //list users
     socket.on('users',(data)=>{
-        for (var i = 0; i < data.users.length; i++) {
-          if (data.users[i].connected == true){
-            console.log(data.users)
-            $("#"+data.users[i].user).remove()
-            users.append($('<li '+'id='+data.users[i].user+'>'+'('+time+') '+data.users[i].user+'</li>'  ));
-          }
-        }
+      console.log(data)
+            $("#"+data.users).remove()
+            users.append($('<li '+'id='+data.users+'>'+'('+time+') '+data.users+'</li>'  ));
+          
+        
     })
     
     //change room 
@@ -90,9 +76,9 @@
     //emit disconnection
     disconnect.click(function(){
       socket.emit('disconnection',{userName:user})
-      console.log(user)
-      localStorage.removeItem('user');
-      window.location = "/login";
+      localStorage.clear()
+      window.location="/";
+    
   })
     
  

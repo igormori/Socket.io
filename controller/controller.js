@@ -37,6 +37,21 @@ exports.date = function(date) {
     })
   }
 
+  exports.setRoom = function(user,roomNumber){
+    request.put({
+      url: `http://localhost:5000/api/users/room/${user}`, 
+      json: {
+        room:roomNumber
+      }
+}, function(error, response, body) {
+      try{
+        response.body.connected
+      }catch(error){
+        console.log(error)
+      }
+})
+  }
+
   exports.setFalse =  function(user){ 
     request.put({
       url: `http://localhost:5000/api/users/${user}`, 

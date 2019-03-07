@@ -12,6 +12,7 @@ router.post('/users',users.registerUsers);
 router.put('/users/:email',users.editOne);
 router.get('/users',users.getusers);
 router.post('/history',history.registerHystory);
+router.put('/users/room/:email',users.editRoom);
 
 //registration route
 router.post('/register',register.register);

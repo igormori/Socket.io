@@ -1,5 +1,24 @@
 
 $("#btn").click(function(){
+
+  var request =async function (){
+    const myHeaders = new Headers();
+   myHeaders.append('Content-Type', 'application/json');
+   myHeaders.append('x-access-token', localStorage.getItem("token"));
+  await fetch('http://localhost:5000/api/me', {
+    method: 'GET',
+    headers: myHeaders
+  }).then(res => res.json())//response type
+  .then(data =>{
+    if(data.auth !=false){
+      localStorage.setItem("validation",true)
+      localStorage.setItem("user",data.email)
+      window.location="/chat"
+    }else{
+      window.location ='/'
+    }
+  });
+ }
 //input
 var email =$("#email").val()
 var password =$("#password").val()
@@ -21,9 +40,7 @@ var password =$("#password").val()
 }).then(res => res.json())//response type
 .then(data =>{
     localStorage.setItem("token",data.token)
-    window.location = "/chat"
-
-    
+    request()
 }); //log the data;
 
 });
