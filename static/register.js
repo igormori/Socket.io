@@ -24,8 +24,13 @@
     
     })
     .then(data =>{
-       console.log(data)
-        //window.location = "/chat"
+       if(data.status= 500){
+         $('#message').html("User already exist, Please try again! ");
+         $("#message").addClass('alert alert-danger');
+       }else{
+         window.location = "/"
+       }
+      
     
         
     }); //log the data;

@@ -6,10 +6,11 @@ var User = require('../model/users')
 
 exports.register =  function(req, res) {
   
-  User.findOne({ email: req.body.email }, function (err, user) {
-    if (err) return res.status(500).send('Error on the server.');
-    if (user) return res.status(404).send('User already exist.');
-  });
+  User.findOne({ email: req.body.email }).then(
+    (result) => {
+        if (result) {
+          res.status(500).send("falso")
+        } else {
   
     var hashedPassword = bcrypt.hashSync(req.body.password, 8);
     
@@ -26,7 +27,11 @@ exports.register =  function(req, res) {
       });
       res.status(200).send({ auth: true, token: token });
     });
-
+    
+  }
+}).catch(err => {
+    console.log(err)
+});
   };
 
   exports.getMe =  function(req, res) {
