@@ -53,7 +53,9 @@
 
     socket.on("list_update",(data)=>{
       if(data.status == false){
-        $("#"+data.userName).remove()
+        if(!$("#"+data.userName).length == 0) {
+          $("#"+data.userName).remove()
+        }
       }else{
         users.append($('<li '+'id='+data.userName+'>'+'('+time+') '+data.userName+'</li>'  ));
       }
@@ -62,8 +64,14 @@
     //list users
     socket.on('users',(data)=>{
       console.log(data)
-            $("#"+data.users).remove()
-            users.append($('<li '+'id='+data.users+'>'+'('+time+') '+data.users+'</li>'  ));
+      if(!$("#"+data.users).length == 0) {
+        $("#"+data.users).remove()
+        users.append($('<li '+'id='+data.users+'>'+'('+time+') '+data.users+'</li>'  ));
+      }else{
+        users.append($('<li '+'id='+data.users+'>'+'('+time+') '+data.users+'</li>'  ));
+      }
+     
+     
           
         
     })

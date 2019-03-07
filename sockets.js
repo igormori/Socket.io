@@ -12,6 +12,7 @@ module.exports = function(io){
    io.on('connect', function(socket) {
 
       socket.room = 1
+      socket.userName =""
        //set user to true when connected
        socket.on("true",(data)=>{
          controller.setTrue(data.userName);
@@ -27,21 +28,23 @@ module.exports = function(io){
          axios.get('http://localhost:5000/api/users')
          .then(function (response) {
             for (var i = 0; i < response.data.length; i++) {
-               if(response.data[i].email == room.userName && response.data[i].connected == true){
-                  if(!response.data[i].room){
-                    controller.setRoom(response.data[i].email,room.roomNumber);  
-                  }else{
-                     room.roomNumber = response.data[i].room
+                  //check if the user has room
+                  if(response.data[i].email == room.userName){
+                     socket.userName = response.data[i].user
+                     if(!response.data[i].room){
+                        controller.setRoom(response.data[i].email,room.roomNumber);  
+                      }else{
+                         room.roomNumber = response.data[i].room
+                      }
                   }
+                  if(response.data[i].room == room.roomNumber && response.data[i].connected == true ){
                       //join the new user to the new room
-                     socket.join(room.roomNumber);
-                     socket.room = room.roomNumber
-                  if(response.data[i].room == room.roomNumber){
-                        
-                        io.sockets.in(room.roomNumber).emit('users',{ users:response.data[i].user});
+                      socket.join(room.roomNumber);
+                      socket.room = room.roomNumber
+                     io.sockets.in(room.roomNumber).emit('users',{ users:response.data[i].user});
                   }
                }
-            }
+            
         
           }).catch(function (error) {console.log(error);});
 
@@ -52,9 +55,8 @@ module.exports = function(io){
 
        //listen on new_message
        socket.on('new_message',(data)=>{
-         console.log(socket.room)
          controller.addHistory(data.userName,data.message,controller.time(d),controller.date(d),socket.room)
-         io.sockets.in(socket.room).emit('new_message',{ message:data.message , userName:data.userName}); 
+         io.sockets.in(socket.room).emit('new_message',{ message:data.message , userName:socket.userName}); 
        });
 
 
@@ -92,9 +94,9 @@ module.exports = function(io){
             //add log
             controller.addLog(data.userName,controller.date(d),controller.time(d),"disconnection")
 
-            io.sockets.in(socket.room).emit('list_update',{userName:data.userName,status:false});
+            socket.broadcast.emit('list_update',{userName:socket.userName,status:false});
             //emite the disconnection update
-            socket.to(socket.room).emit('new_update',  {message:`** ${data.userName} disconnected **`} );
+            socket.to(socket.room).emit('new_update',  {message:`** ${socket.userName} disconnected **`} );
             controller.setFalse(data.userName)
       })
       
