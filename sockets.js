@@ -13,12 +13,15 @@ module.exports = function(io){
 
       socket.room = 1
       socket.userName =""
+      socket.colors = ["primary","secondary","success","danger","warning"];
        //set user to true when connected
        socket.on("true",(data)=>{
          controller.setTrue(data.userName);
          //add log
          controller.addLog(data.userName,controller.date(d),controller.time(d),"connection")
       })
+
+
       //emite message for the client 
       socket.emit('new_update',  {message: `** you have joined a new chat **`} ); 
       
@@ -30,7 +33,10 @@ module.exports = function(io){
             for (var i = 0; i < response.data.length; i++) {
                   //check if the user has room
                   if(response.data[i].email == room.userName){
-                     socket.userName = response.data[i].user
+                       // emit to everyone else in the room 
+                       socket.userName = response.data[i].user
+                       socket.broadcast.to(room.roomNumber).emit('new_update',{message:`** ${response.data[i].user} joined the chat **`} );
+                    
                      if(!response.data[i].room){
                         controller.setRoom(response.data[i].email,room.roomNumber);  
                       }else{
@@ -40,19 +46,18 @@ module.exports = function(io){
                   if(response.data[i].room == room.roomNumber && response.data[i].connected == true ){
                       //join the new user to the new room
                       socket.join(room.roomNumber);
+                      //change room color
+                      io.sockets.in(room.roomNumber).emit('room_color',  {newColor:socket.colors[room.roomNumber-1]} ); 
                       socket.room = room.roomNumber
                      io.sockets.in(room.roomNumber).emit('users',{ users:response.data[i].user});
+                     
                   }
                }
             
         
           }).catch(function (error) {console.log(error);});
 
-       
-         // emit to everyone else in the room 
-         socket.broadcast.to(room.roomNumber).emit('new_update',{message:`** ${socket.userName} joined the chat **`,update:"no"} );
          })
-
        //listen on new_message
        socket.on('new_message',(data)=>{
          controller.addHistory(data.userName,data.message,controller.time(d),controller.date(d),socket.room)
@@ -62,30 +67,32 @@ module.exports = function(io){
 
       // Change room
       socket.on("changeRoom", (room) => {
-         var color = ""
-         if(socket.room == 2){
-            room.roomNumber +=-1 ;
-            color = "warning";
-         }else{
-            color = "danger";
-         }
+         var colors = ["primary","secondary","success","danger","warning"];
             var oldRoom =  socket.room
-            socket.leave(socket.room, function (err) {
+            if(socket.room < 5){
+               socket.room ++;
+            }else{
+               socket.room =1;
+            }
+            console.log(oldRoom)
+            console.log(socket.room)
+            
+            socket.leave(oldRoom, function (err) {
                // display null
                // display the same list of rooms the specified room is still there
             });
             //add log
             controller.addLog(room.userName,controller.date(d),controller.time(d),"Joined")
-
-            socket.room = room.roomNumber;
+            controller.setRoom(room.userName,socket.room)
             socket.join(socket.room);
 
             // emito update to the old room
             io.sockets.in(oldRoom).emit('new_update',  {message: `** ${socket.userName} left the room **`} );  
+            io.sockets.in(oldRoom).emit('list_update',{userName:socket.userName,status:false});
             // emit update to the new room
-            io.sockets.in(room.roomNumber).emit('list_update',{userName:socket.userName,status:true});
-            io.sockets.in(room.roomNumber).emit('connected',  {oldColor:"danger",newColor:color} ); 
-            io.sockets.in(room.roomNumber).emit('new_update',  {message:`** ${socket.userName} joined a new room **`} );  
+            io.sockets.in(socket.room).emit('list_update',{userName:socket.userName,status:true});
+            io.sockets.in(socket.room).emit('room_color',  {oldColor:socket.colors[oldRoom-1],newColor:socket.colors[socket.room-1]} );  
+            io.sockets.in(socket.room).emit('new_update',  {message:`** ${socket.userName} joined the room **`} );  
       });
 
       // disconnection

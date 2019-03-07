@@ -30,9 +30,15 @@
       socket.emit('create', {roomNumber:1,userName:user});
 
       //change room color
-    socket.on('connected',(data)=>{
-      $('.chat').removeClass(`bg-${data.oldColor}`);
-      $('.chat').addClass(`bg-${data.newColor}`)
+    socket.on('room_color',(data)=>{
+      console.log(data.newColor)
+      if(!data.oldColor){
+        $('.chat').addClass(`bg-${data.newColor}`)
+      }else{
+        $('.chat').removeClass(`bg-${data.oldColor}`);
+        $('.chat').addClass(`bg-${data.newColor}`)
+      }
+    
     })
   
     //emit message
@@ -57,6 +63,7 @@
           $("#"+data.userName).remove()
         }
       }else{
+        $("#"+data.userName).remove()
         users.append($('<li '+'id='+data.userName+'>'+'('+time+') '+data.userName+'</li>'  ));
       }
     })
