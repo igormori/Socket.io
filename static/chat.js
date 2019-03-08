@@ -70,7 +70,8 @@
       if(!$("#"+data.users).length == 0) {
         $("#"+data.users).remove()
         users.append($('<li '+'id='+data.users+'>'+'('+time+') '+data.users+'</li>'  ));
-      }else if(data.status){
+      }else
+       if(data.status){
         $("#"+data.users).remove()
       }
       else{

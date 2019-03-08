@@ -86,11 +86,12 @@ exports.addLog =  function(u,d,t,e){
 })
 }
 
-exports.addHistory = function(u,m,d,t,r){
+exports.addHistory = function(u,re,m,d,t,r){
   request.post({
     url: `http://localhost:5000/api/history`, 
     json: {
-        user : u,
+        sender : u,
+        reciever:re,
         message:m,
         date: d,
         time: t,

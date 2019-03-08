@@ -4,15 +4,9 @@ var d = new Date();
 const EventEmitter = require('events');
 class MyEmitter extends EventEmitter {}
 const myEmitter = new MyEmitter();
+myEmitter.setMaxListeners(10000)
 
-
-
-/* Algorithm
-1- set user to true
-2- grab user list from data base 
-3- join new user to the room 
-*/
-
+var list =''
 module.exports = function(io){
    io.on('connect', function(socket) {
 
@@ -35,6 +29,7 @@ module.exports = function(io){
          .then(function (response) {
                socket.userName = response.data[0].user 
                socket.room =  response.data[0].room
+               socket.email = response.data[0].email
                socket.join(response.data[0].room);
                socket.broadcast.to(response.data[0].room).emit('new_update',{message:`** ${response.data[0].user} joined the chat **`} );
                io.sockets.in(response.data[0].room).emit('room_color',  {newColor:socket.colors[response.data[0].room-1]} ); 
@@ -44,12 +39,24 @@ module.exports = function(io){
      
        //listen on new_message
        socket.on('new_message',(data)=>{
-         controller.addHistory(data.userName,data.message,controller.time(d),controller.date(d),socket.room)
+          var userList = []
+          for (var i=0;i<list.length;i++){
+            if(list[i].room == socket.room && list[i].email !=socket.email ){
+               userList.push(list[i].email)
+            }
+          }
+          console.log(userList)
+          
+         controller.addHistory(data.userName, userList , data.message ,controller.date(d),controller.time(d),socket.room)
          io.sockets.in(socket.room).emit('new_message',{ message:data.message , userName:socket.userName}); 
        });
 
       // Change room
       socket.on("changeRoom", (room) => {
+
+            var userList = []
+            
+            
             var oldRoom =  socket.room
             if(socket.room < 5){
                socket.room ++;
@@ -76,7 +83,18 @@ module.exports = function(io){
             io.sockets.in(socket.room).emit('list_update',{userName:socket.userName,status:true});
             io.sockets.in(socket.room).emit('room_color',  {oldColor:socket.colors[oldRoom-1],newColor:socket.colors[socket.room-1]} );  
             io.sockets.in(socket.room).emit('new_update',  {message:`** ${socket.userName} joined the room **`} );  
-            socket.emit("redirect");
+            // socket.emit("redirect");
+            
+            for (var i=0;i<list.length;i++){
+               console.log(socket.room)
+               if(list[i].room != socket.room && list[i].user !=socket.userName ){
+                  userList.push(list[i].email)
+                  console.log(list[i].user)
+                  io.sockets.in(socket.room).emit('list_update',{userName:list[i].user,status:false});
+               }
+               }
+              
+            
       });
 
       // disconnection
@@ -99,7 +117,8 @@ module.exports = function(io){
        //send the list of the users in the room
        myEmitter.on('users_list',function(data){
          axios.get("http://localhost:5000/api/users")
-         .then(function (response) {
+         .then(function (response) { 
+            list = response.data
             for (var i = 0; i < response.data.length; i++) {
                if(response.data[i].room == data.room && response.data[i].connected == true){
                   io.sockets.in(data.room).emit('users',{users:response.data[i].user});
@@ -107,8 +126,6 @@ module.exports = function(io){
             }
           }).catch(function (error) {console.log(error);});
    })
-
-      
    })
   
 }
