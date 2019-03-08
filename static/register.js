@@ -50,7 +50,7 @@
      
     //input
     var data = {
-      "name":userName,
+      "user":userName,
       "email": email,
       "password":password
 
@@ -70,7 +70,7 @@
       if(data.ok){
         window.location = "/"
       }else{
-        $('#message').html("Error: user already exists. Please try again!");
+        $('#message').html("Error: username/email already exists. Please try again!");
         $("#message").addClass('alert alert-danger');
       }
     }).catch(error =>{

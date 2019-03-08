@@ -6,7 +6,7 @@ var User = require('../model/users')
 
 exports.register =  function(req, res) {
   
-  User.findOne({ email: req.body.email }).then(
+  User.find({ email: req.body.email,user:req.body.user }).then(
     (result) => {
         if (result) {
           res.status(500).send("falso")
