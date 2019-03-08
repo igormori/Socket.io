@@ -1,28 +1,26 @@
 const axios = require('axios');
-const controller = require('./controller/controller')
+const controller = require('./controller/requestController')
 var d = new Date();
-const EventEmitter = require('events');
-class MyEmitter extends EventEmitter {}
-const myEmitter = new MyEmitter();
-myEmitter.setMaxListeners(10000)
-
 var list =''
+
+
 module.exports = function(io){
    io.on('connect', function(socket) {
       socket.room = 1
       socket.userName =""
       socket.colors = ["primary","danger","success","warning","light"];
       socket.list=[]
-       //set user to true when connected
+
+//    <----- Set true if user connects ----->
        socket.on("true",(data)=>{
          controller.setTrue(data.userName);
-         //add log
+         //save on db
          controller.addLog(data.userName,controller.date(d),controller.time(d),"connection")
-         //emite message for the client 
          socket.emit('new_update',  {message: `** you have joined a new chat **`} ); 
+         console.log("user connected")
       })
       
-      //new room creation and user list update
+//    <----- create a new room ----->
       socket.on('create', function(data) {  
          socket.userName = data.userName
          socket.room =  data.room
@@ -31,13 +29,11 @@ module.exports = function(io){
          socket.join(data.room);
          socket.broadcast.to(data.room).emit('new_update',{message:`** ${data.userName} joined the room **`} );
          socket.emit('room_color',  {newColor:socket.colors[data.room-1]} ); 
-         //myEmitter.emit('users_list',{userName:data.email,room:data.room});
          })
 
-       //send the list of the users in the room
+//    <----- Send list of all users in the same room----->
        socket.on('users_list',function(data){
-         axios.get("http://localhost:5000/api/users")
-         .then(function (response) { 
+         axios.get("http://localhost:5000/api/users").then(function (response) { 
             list=(response.data)
             var lists = []
             for (var i = 0; i < response.data.length; i++) {
@@ -49,9 +45,8 @@ module.exports = function(io){
           }).catch(function (error) {console.log(error);});
    })
   
-
      
-       //listen on new_message
+//    <----- Listen for messages and save messages on DB ----->
        socket.on('new_message',(data)=>{
           var userList = []
           for (var i=0;i<list.length;i++){
@@ -59,29 +54,21 @@ module.exports = function(io){
                userList.push(list[i].email)
             }
           }
-          console.log(userList)
-          
+          console.log("message sent history saved!")
+          //save on db
          controller.addHistory(data.userName, userList , data.message ,controller.date(d),controller.time(d),socket.room)
          io.sockets.in(socket.room).emit('new_message',{ message:data.message , userName:socket.userName}); 
        });
 
-      // Change room
-      socket.on("changeRoom", (room) => {
-            var userList = []
-            var oldRoom =  socket.room
-            if(socket.room < 5){
-               socket.room ++;
-            }else{
-               socket.room = 1;
-            }
-            console.log("Room changed to: "+socket.room)
-            
-            socket.leave(socket.room, function (err) {
-               // display null
-               // display the same list of rooms the specified room is still there
-            });
-            //add log
 
+//    <----- Change room and update old room and neww room ----->
+      socket.on("changeRoom", (room) => {
+            var oldRoom =  socket.room
+            if(socket.room < 5){socket.room ++;}else{socket.room = 1;}
+            console.log("Room changed to: "+socket.room)
+            socket.leave(socket.room, function (err) {});
+
+            //save on db
             controller.addLog(room.email,controller.date(d),controller.time(d),"Joined")
             controller.setRoom(room.email,socket.room)
             socket.join(socket.room);
@@ -93,32 +80,20 @@ module.exports = function(io){
             // emit update to the new room
             io.sockets.in(socket.room).emit('list_update',{userName:socket.userName,status:true});
             io.sockets.in(socket.room).emit('room',{room:socket.room})
-
-           // io.sockets.in(socket.room).emit('list_update',{userName:socket.userName,status:true});
             io.sockets.in(socket.room).emit('room_color',  {oldColor:socket.colors[oldRoom-1],newColor:socket.colors[socket.room-1]} );  
             io.sockets.in(socket.room).emit('new_update',  {message:`** ${socket.userName} joined the room **`} );  
             socket.emit('list_update',{userName:socket.userName,status:"reload"});
-        
       });
 
-      // disconnection
+//    <----- User disconnection ----->
       socket.on("disconnection",(data)=>{
-            var d = new Date();
             console.log( data.userName + " Disconnected")
-            //add log
+            //save on db
             controller.setFalse(data.email)
             controller.addLog(data.email,controller.date(d),controller.time(d),"disconnection")
-
             socket.broadcast.emit('list_update',{userName:data.userName,status:false});
-            
-            //emite the disconnection update
             socket.to(socket.room).emit('new_update',  {message:`** ${socket.userName} disconnected **`} );
-            
-            
       })
-
-
-
    })
   
 }

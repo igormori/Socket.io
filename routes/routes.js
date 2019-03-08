@@ -8,7 +8,8 @@ const register = require("../auth/AuthController")
 
 //history routes
 router.post('/history',history.registerHistory);
-router.get('/history/:sender/:reciever',history.getHistory);
+router.get('/history',history.getHistory);
+router.get('/history/:room',history.getHistoryByRoom);
 
 //eventLog routes
 router.post('/eventLog', eventController.registerEvents);

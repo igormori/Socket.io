@@ -6,30 +6,30 @@ var User = require('../model/users')
 
 exports.register =  function(req, res) {
   
-  User.find({ email: req.body.email,user:req.body.user }).then(
+  User.findOne({ email: req.body.email,user:req.body.user }).then(
     (result) => {
         if (result) {
-          res.status(500).send("falso")
+          res.status(500).send("erro user already exists")
+         
         } else {
-  
-    var hashedPassword = bcrypt.hashSync(req.body.password, 8);
+          
+          var hashedPassword = bcrypt.hashSync(req.body.password, 8);
     
-    User.create({
-      user : req.body.name,
-      email : req.body.email,
-      password : hashedPassword,
-      room:1
-
-    },
-    function (err, user) {
-      if (err) return res.status(500).send("There was a problem registering the user.")
-      // create a token
-      var token = jwt.sign({ id: user._id }, config.secret, {
-        expiresIn: 86400 // expires in 24 hours
-      });
-      res.status(200).send({ auth: true, token: token });
-    });
-    
+          User.create({
+            user : req.body.user,
+            email : req.body.email,
+            password : hashedPassword,
+            room:1
+      
+          },
+          function (err, user) {
+            if (err) return res.status(500).send("There was a problem registering the user.")
+            // create a token
+            var token = jwt.sign({ id: user._id }, config.secret, {
+              expiresIn: 86400 // expires in 24 hours
+            });
+            res.status(200).send({ auth: true, token: token });
+          });
   }
 }).catch(err => {
     console.log(err)

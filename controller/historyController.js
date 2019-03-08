@@ -25,7 +25,23 @@ exports.registerHistory = async function (req, res) {
 
     exports.getHistory = async function(req,res){
         try{
-            let getHistory = await history.find({sender:req.params.sender, reciever:req.params.reciever})
+            let getHistory = await history.find()
+            res.status(200).send(getHistory)
+            console.log(req.params.reciever)
+            console.log(req.params.sender)
+        }catch(error){
+            res.status(400).send({
+                message:"no data",
+                error:error.message
+    
+            })
+        }
+    }
+
+    
+    exports.getHistoryByRoom = async function(req,res){
+        try{
+            let getHistory = await history.find({room:req.params.room})
             res.status(200).send(getHistory)
             console.log(req.params.reciever)
             console.log(req.params.sender)
