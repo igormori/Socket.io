@@ -26,14 +26,12 @@
     
       //create the initial connection
       socket.emit('connect',socket);
-      console.log(user)
       socket.emit('true',{userName:user});
       socket.emit('create', {roomNumber:1,userName:user});
       
 
       //change room color
     socket.on('room_color',(data)=>{
-      console.log(data.newColor)
       if(!data.oldColor){
         $('.chat').addClass(`bg-${data.newColor}`)
       }else{

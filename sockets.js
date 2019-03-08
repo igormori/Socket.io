@@ -26,40 +26,19 @@ module.exports = function(io){
       
       //new room creation and user list update
       socket.on('create', function(room) {  
-         //update connected user list
-         axios.get('http://localhost:5000/api/users')
+         console.log(room.userName)
+         axios.get(`http://localhost:5000/api/users/${room.userName}`)
          .then(function (response) {
-            for (var i = 0; i < response.data.length; i++) {
-                  //check if the user has room
-                  if(response.data[i].email == room.userName){
-                     console.log(response.data[i].email + " Connected")
-                       // emit to everyone else in the room 
-                       socket.userName = response.data[i].user
-                       socket.broadcast.to(room.roomNumber).emit('new_update',{message:`** ${response.data[i].user} joined the chat **`} );
-                    
-                     if(!response.data[i].room){
-                        console.log(response.data[i].user)
-                        socket.emit('no_room',{romm:false})
-                        controller.setRoom(response.data[i].email,room.roomNumber);  
-                      }else{
-                         room.roomNumber = response.data[i].room
-                      }
-                  }
-                  if(response.data[i].room == room.roomNumber && response.data[i].connected == true ){
-                      //join the new user to the new room
-                      socket.join(room.roomNumber);
-                      //change room color
-                      io.sockets.in(room.roomNumber).emit('room_color',  {newColor:socket.colors[room.roomNumber-1]} ); 
-                      socket.room = room.roomNumber
-                     io.sockets.in(room.roomNumber).emit('users',{ users:response.data[i].user});
-                     
-                  }
-               }
-            
-        
+               socket.join(response.data[0].room);
+               socket.room = room.roomNumber = response.data.room
+               console.log(response.data[0].email + " Connected")
+               socket.userName = response.data[0].user
+               socket.broadcast.to(response.data[0].room).emit('new_update',{message:`** ${response.data[0].user} joined the chat **`} );
+               io.sockets.in(response.data[0].room).emit('room_color',  {newColor:socket.colors[response.data[0].room-1]} ); 
+               io.sockets.in(response.data[0].room).emit('list_update',{userName:response.data[0].user,status:true});
           }).catch(function (error) {console.log(error);});
-
          })
+
        //listen on new_message
        socket.on('new_message',(data)=>{
          controller.addHistory(data.userName,data.message,controller.time(d),controller.date(d),socket.room)
