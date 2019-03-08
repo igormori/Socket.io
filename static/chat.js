@@ -23,6 +23,8 @@
     var room_change =$('#btnChange');
     var user = localStorage.getItem("user");
     var disconnect = $("#btnDisconnect");
+    var room = localStorage.getItem("room")
+    var userName = localStorage.getItem("userName")
     
       //create the initial connection
       socket.emit('connect',socket);
@@ -32,20 +34,9 @@
 
       //change room color
     socket.on('room_color',(data)=>{
-      if(!data.oldColor){
-        $('.chat').addClass(`bg-${data.newColor}`)
-      }else{
         $('.chat').removeClass(`bg-${data.oldColor}`);
         $('.chat').addClass(`bg-${data.newColor}`)
-      }
-    
-    })
-    socket.on("no_room",(data)=>{
- 
-        location.reload();
-    
-    })
-      
+    })    
   
     //emit message
     send_message.click(function(){
@@ -76,31 +67,34 @@
     
     //list users
     socket.on('users',(data)=>{
-      console.log(data)
       if(!$("#"+data.users).length == 0) {
         $("#"+data.users).remove()
         users.append($('<li '+'id='+data.users+'>'+'('+time+') '+data.users+'</li>'  ));
-      }else{
-        users.append($('<li '+'id='+data.users+'>'+'('+time+') '+data.users+'</li>'  ));
+      }else if(data.status){
+        $("#"+data.users).remove()
       }
-     
-     
-          
-        
+      else{
+        users.append($('<li '+'id='+data.users+'>'+'('+time+') '+data.users+'</li>'  ));
+      }    
     })
     
     //change room 
     room_change.click(function(){
-      socket.emit('changeRoom',{roomNumber:2,userName:user})
+      console.log(room)
+      console.log(user)
+      console.log(userName)
+      socket.emit('changeRoom',{roomNumber:room,user:userName,email:user})
     })
 
     //emit disconnection
     disconnect.click(function(){
-      socket.emit('disconnection',{userName:user})
+      socket.emit('disconnection',{userName:userName,room:room,email:user})
       localStorage.clear()
       window.location="/";
     
   })
-    
- 
+
+  socket.on('redirect',(data)=>{
+    location.reload();
+  });
   

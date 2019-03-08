@@ -13,6 +13,8 @@ $("#btn").click(function(){
     if(data.auth !=false){
       localStorage.setItem("validation",true)
       localStorage.setItem("user",data.email)
+      localStorage.setItem("room",data.room)
+      localStorage.setItem("userName",data.user)
       window.location="/chat"
     }else{
       window.location ='/'
