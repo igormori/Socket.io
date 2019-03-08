@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 
 const history= mongoose.Schema({
-    user : String,
+    sender: String,
+    reciever:[String],
     message: String,
     date: String,
     time: String,

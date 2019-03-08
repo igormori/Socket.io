@@ -1,9 +1,10 @@
 var history = require('../model/historyModel')
 
-exports.registerHystory = async function (req, res) {
+exports.registerHistory = async function (req, res) {
     try{
         await history.create({
-            user:req.body.user,
+            sender:req.body.sender,
+            reciever:req.body.reciever,
             message:req.body.message,
             date:req.body.date,
             time: req.body.time,
@@ -20,3 +21,19 @@ exports.registerHystory = async function (req, res) {
         }
     }
 
+
+
+    exports.getHistory = async function(req,res){
+        try{
+            let getHistory = await history.find({sender:req.params.sender, reciever:req.params.reciever})
+            res.status(200).send(getHistory)
+            console.log(req.params.reciever)
+            console.log(req.params.sender)
+        }catch(error){
+            res.status(400).send({
+                message:"no data",
+                error:error.message
+    
+            })
+        }
+    }
