@@ -21,15 +21,17 @@
     var chatRoom = $('#messages');
     var users = $('#users');
     var room_change =$('#btnChange');
-    var user = localStorage.getItem("user");
+    var email = localStorage.getItem("user");
     var disconnect = $("#btnDisconnect");
     var room = localStorage.getItem("room")
     var userName = localStorage.getItem("userName")
     
       //create the initial connection
       socket.emit('connect',socket);
-      socket.emit('true',{userName:user});
-      socket.emit('create', {roomNumber:1,userName:user});
+      socket.emit('true',{userName:email});
+      socket.emit('create', {room:room,userName:userName,email:email});
+      socket.emit('users_list', {room:room,userName:userName,email:email});
+     // socket.emit('atualize_users',{room:room,userName:userName,email:email})
       
 
       //change room color
@@ -53,6 +55,9 @@
     socket.on("new_message",(data)=>{
       chatRoom.append($('<li> ('+time+') <b> '+ data.userName+ '</b>'+ ' says:  '+ data.message+ '</li>'));
     })
+    socket.on("room",(data)=>{
+      localStorage.setItem("room",data.room)
+    })
 
     socket.on("list_update",(data)=>{
       if(data.status == false){
@@ -63,28 +68,35 @@
         $("#"+data.userName).remove()
         users.append($('<li '+'id='+data.userName+'>'+'('+time+') '+data.userName+'</li>'  ));
       }
+      if(data.status == "reload"){
+        location.reload()
+      }
     })
     
     //list users
-    socket.on('users',(data)=>{
-      if(!$("#"+data.users).length == 0) {
-        $("#"+data.users).remove()
-        users.append($('<li '+'id='+data.users+'>'+'('+time+') '+data.users+'</li>'  ));
-      }else
-       if(data.status){
-        $("#"+data.users).remove()
-      }
-      else{
-        users.append($('<li '+'id='+data.users+'>'+'('+time+') '+data.users+'</li>'  ));
-      }    
+    socket.on('users',(data)=>{    
+      for (var i = 0; i < data.users.length; i++) {
+             console.log(data.users[i])
+            if(!$("#"+data.users[i]).length == 0) {
+              $("#"+data.users[i]).remove()
+              users.append($('<li '+'id='+data.users[i]+'>'+'('+time+') '+data.users[i]+'</li>'  ));
+            }else
+            if(data.status){
+              $("#"+data.users[i]).remove()
+            }
+            else{
+              users.append($('<li '+'id='+data.users[i]+'>'+'('+time+') '+data.users[i]+'</li>'  ));
+            }    
+      
+    }
     })
     
     //change room 
     room_change.click(function(){
       console.log(room)
-      console.log(user)
+      console.log(email)
       console.log(userName)
-      socket.emit('changeRoom',{roomNumber:room,user:userName,email:user})
+      socket.emit('changeRoom',{roomNumber:room,user:userName,email:email})
     })
 
     //emit disconnection
