@@ -32,7 +32,7 @@ module.exports = function(io){
             for (var i = 0; i < response.data.length; i++) {
                   //check if the user has room
                   if(response.data[i].email == room.userName){
-                     console.log(room.userName+ "Connected")
+                     console.log(response.data[i].email + " Connected")
                        // emit to everyone else in the room 
                        socket.userName = response.data[i].user
                        socket.broadcast.to(room.roomNumber).emit('new_update',{message:`** ${response.data[i].user} joined the chat **`} );
@@ -75,7 +75,7 @@ module.exports = function(io){
             }else{
                socket.room =1;
             }
-            console.log("Room changed to"+socket.room)
+            console.log("Room changed to: "+socket.room)
             
             socket.leave(oldRoom, function (err) {
                // display null
@@ -98,7 +98,7 @@ module.exports = function(io){
       // disconnection
       socket.on("disconnection",(data)=>{
             var d = new Date();
-            console.log(data.userName+ "Disconnected")
+            console.log( data.userName + " Disconnected")
             //add log
             controller.addLog(data.userName,controller.date(d),controller.time(d),"disconnection")
 
