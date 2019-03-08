@@ -101,7 +101,7 @@
 
     //emit disconnection
     disconnect.click(function(){
-      socket.emit('disconnection',{userName:userName,room:room,email:user})
+      socket.emit('disconnection',{userName:userName,room:room,email:email})
       localStorage.clear()
       window.location="/";
     
