@@ -41,9 +41,15 @@ var password =$("#password").val()
 
 }).then(res => res.json())//response type
 .then(data =>{
-    localStorage.setItem("token",data.token)
-    request()
-}); //log the data;
+    if(data.auth){
+      localStorage.setItem("token",data.token)
+      request()
+    }else{
+      $('#message').html("Error: Wrong email/password. Please try again!");
+      $("#message").addClass('alert alert-danger');
+    }
+    
+}); 
 
 });
 
