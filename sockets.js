@@ -13,14 +13,13 @@ module.exports = function(io){
 
       socket.room = 1
       socket.userName =""
-      socket.colors = ["primary","secondary","success","danger","warning"];
+      socket.colors = ["primary","danger","success","warning","light"];
        //set user to true when connected
        socket.on("true",(data)=>{
          controller.setTrue(data.userName);
          //add log
          controller.addLog(data.userName,controller.date(d),controller.time(d),"connection")
       })
-
 
       //emite message for the client 
       socket.emit('new_update',  {message: `** you have joined a new chat **`} ); 
@@ -33,11 +32,14 @@ module.exports = function(io){
             for (var i = 0; i < response.data.length; i++) {
                   //check if the user has room
                   if(response.data[i].email == room.userName){
+                     console.log(room.userName+ "Connected")
                        // emit to everyone else in the room 
                        socket.userName = response.data[i].user
                        socket.broadcast.to(room.roomNumber).emit('new_update',{message:`** ${response.data[i].user} joined the chat **`} );
                     
                      if(!response.data[i].room){
+                        console.log(response.data[i].user)
+                        socket.emit('no_room',{romm:false})
                         controller.setRoom(response.data[i].email,room.roomNumber);  
                       }else{
                          room.roomNumber = response.data[i].room
@@ -67,15 +69,13 @@ module.exports = function(io){
 
       // Change room
       socket.on("changeRoom", (room) => {
-         var colors = ["primary","secondary","success","danger","warning"];
             var oldRoom =  socket.room
             if(socket.room < 5){
                socket.room ++;
             }else{
                socket.room =1;
             }
-            console.log(oldRoom)
-            console.log(socket.room)
+            console.log("Room changed to"+socket.room)
             
             socket.leave(oldRoom, function (err) {
                // display null
@@ -98,6 +98,7 @@ module.exports = function(io){
       // disconnection
       socket.on("disconnection",(data)=>{
             var d = new Date();
+            console.log(data.userName+ "Disconnected")
             //add log
             controller.addLog(data.userName,controller.date(d),controller.time(d),"disconnection")
 

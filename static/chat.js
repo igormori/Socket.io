@@ -1,5 +1,6 @@
   var socket = io();
-    
+
+
     //time stamp
     function formatDate(date) {
       var hours = date.getHours();
@@ -28,6 +29,7 @@
       console.log(user)
       socket.emit('true',{userName:user});
       socket.emit('create', {roomNumber:1,userName:user});
+      
 
       //change room color
     socket.on('room_color',(data)=>{
@@ -40,6 +42,12 @@
       }
     
     })
+    socket.on("no_room",(data)=>{
+ 
+        location.reload();
+    
+    })
+      
   
     //emit message
     send_message.click(function(){
