@@ -18,7 +18,7 @@ router.get('/eventLog',eventController.getEvents);
 router.put('/users/room/:email',users.editRoom);
 router.post('/users',users.registerUsers);
 router.put('/users/:email',users.editOne);
-router.get('/users',users.getusers);
+router.get('/users/:email',users.getusers);
 
 //registration routes
 router.post('/register',register.register);
